@@ -13,6 +13,7 @@ class Window(Frame):
             width=40,
             height=40,
             bg="#999999",
+            activebackground="#aaaaaa",
             command=lambda: self.requests_queue.put(protocol.request_do_turn(x, y))
         )
         btn.place(x=0, y=0)
@@ -28,6 +29,14 @@ class Window(Frame):
                 row.append(self.create_btn(board, i, j))
             self.board_buttons.append(row)
 
+    def create_player_indicator(self):
+        self.player_indicator_canvas = Canvas(self.master, width=35, height=20)
+        self.player_indicator_canvas.place(x=10, y=80)
+        self.player_indicator_canvas_id = self.player_indicator_canvas.create_rectangle(0, 0, 35, 20, fill="#999999")
+
+    def refill_player_indicator(self, color):
+        self.player_indicator_canvas.itemconfig(self.player_indicator_canvas_id, fill=color)
+
     def __init__(self, responses_queue, requests_queue, master=None):
         Frame.__init__(self, master)
         self.master = master
@@ -36,6 +45,7 @@ class Window(Frame):
         self.requests_queue = requests_queue
 
         Button(self.master, text="Start", command=self.start_game).place(x=10, y=40)
+        self.create_player_indicator()
         self.master.after(1000, self.handle_resps)
 
     def start_game(self):
@@ -46,8 +56,9 @@ class Window(Frame):
         if resp.resp_type == "Error":
             showinfo("Error", resp.resp_info)
         elif resp.resp_type == "Update":
-            for loc in resp.resp_info:
-                self.board_buttons[loc.pos[0]][loc.pos[1]].config(bg=loc.color)
+            for tile in resp.resp_info.tiles:
+                self.board_buttons[tile.pos[0]][tile.pos[1]].config(bg=tile.color)
+            self.refill_player_indicator(resp.resp_info.player)
 
     def handle_resps(self):
         print('Handling tasks...')
