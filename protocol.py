@@ -39,6 +39,7 @@ def parse_response(resp):
 
 
 def request_start(): return "Start;"
+def request_cancel(): return "Cancel;"
 
 
 def request_do_turn(x, y): return "DoTurn;%d,%d" % (x, y)

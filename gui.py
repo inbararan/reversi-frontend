@@ -31,7 +31,7 @@ class Window(Frame):
 
     def create_player_indicator(self):
         self.player_indicator_canvas = Canvas(self.master, width=35, height=20)
-        self.player_indicator_canvas.place(x=10, y=80)
+        self.player_indicator_canvas.place(x=10, y=120)
         self.player_indicator_canvas_id = self.player_indicator_canvas.create_rectangle(0, 0, 35, 20, fill="#999999")
 
     def refill_player_indicator(self, color):
@@ -45,12 +45,15 @@ class Window(Frame):
         self.requests_queue = requests_queue
 
         Button(self.master, text="Start", command=self.start_game).place(x=10, y=40)
+        Button(self.master, text="Cancel", command=self.cancel_move).place(x=10, y=80)
         self.create_player_indicator()
-        self.master.after(1000, self.handle_resps)
+        self.master.after(400, self.handle_resps)
 
     def start_game(self):
         self.create_board(10, 10)
         self.requests_queue.put(protocol.request_start())
+    def cancel_move(self):
+        self.requests_queue.put(protocol.request_cancel())
 
     def handle_resp(self, resp):
         if resp.resp_type == "Error":
@@ -67,7 +70,7 @@ class Window(Frame):
             print("Handling task: %s" % resp)
             self.handle_resp(protocol.parse_response(resp))
 
-        self.master.after(1000, self.handle_resps)  # called only once!
+        self.master.after(200, self.handle_resps)  # called only once!
 
 
 def start(responses_queue, requests_queue):
